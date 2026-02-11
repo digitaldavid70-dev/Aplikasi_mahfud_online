@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, Package, Edit2, DollarSign } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Plus, Package, Edit2, DollarSign, Search } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { formatIDR } from '../../utils/formatters';
+import { searchInObject } from '../../utils/search';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import CurrencyInput from '../common/CurrencyInput';
+import SearchBar from '../common/SearchBar';
 
 const PartnersView = () => {
     const { partners, products, addPartner, updatePartner, recordPayment } = useApp();
@@ -14,6 +16,12 @@ const PartnersView = () => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [paymentAmount, setPaymentAmount] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filtered partners based on search
+    const filteredPartners = useMemo(() => {
+        return partners.filter(p => searchInObject(p, searchQuery));
+    }, [partners, searchQuery]);
 
     const handleAdd = (e) => {
         e.preventDefault();
@@ -52,7 +60,7 @@ const PartnersView = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--slate-900)' }}>
                     Daftar Mitra & Konsinyasi
                 </h2>
@@ -62,88 +70,79 @@ const PartnersView = () => {
                 </Button>
             </div>
 
-            <div className="card" style={{ overflow: 'hidden' }}>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Toko / Pemilik</th>
-                            <th>Alamat & WA</th>
-                            <th style={{ textAlign: 'right' }}>Saldo Piutang</th>
-                            <th style={{ textAlign: 'center' }}>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {partners.map(p => (
-                            <tr key={p.id}>
-                                <td>
-                                    <div style={{ fontWeight: '700', color: 'var(--slate-900)' }}>{p.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)' }}>{p.owner}</div>
-                                </td>
-                                <td style={{ fontSize: '0.875rem' }}>
-                                    <div>{p.address}</div>
-                                    <div style={{ color: 'var(--success)', fontWeight: '500' }}>{p.phone}</div>
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: '700', color: 'var(--danger)' }}>
-                                        {formatIDR(p.debt - p.totalPaid)}
-                                    </div>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={() => { setSelectedPartner(p); setShowInventoryModal(true); }}
-                                            style={{
-                                                padding: '0.375rem',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                cursor: 'pointer',
-                                                borderRadius: 'var(--radius-lg)',
-                                                color: 'var(--slate-600)',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
-                                            title="Cek Stok"
-                                        >
-                                            <Package size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => { setSelectedPartner(p); setShowEditModal(true); }}
-                                            style={{
-                                                padding: '0.375rem',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                cursor: 'pointer',
-                                                borderRadius: 'var(--radius-lg)',
-                                                color: 'var(--primary)',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
-                                            title="Edit Mitra"
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => { setSelectedPartner(p); setShowPaymentModal(true); }}
-                                            style={{
-                                                padding: '0.375rem',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                cursor: 'pointer',
-                                                borderRadius: 'var(--radius-lg)',
-                                                color: 'var(--success)',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
-                                            title="Bayar Piutang"
-                                        >
-                                            <DollarSign size={16} />
-                                        </button>
-                                    </div>
-                                </td>
+            {/* toolbar */}
+            <div className="card" style={{ padding: '1rem' }}>
+                <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Cari nama toko, pemilik, atau alamat..."
+                />
+            </div>
+
+            <div className="card">
+                <div className="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Toko / Pemilik</th>
+                                <th>Alamat & WA</th>
+                                <th style={{ textAlign: 'right' }}>Saldo Piutang</th>
+                                <th style={{ textAlign: 'center' }}>Aksi</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredPartners.map(p => (
+                                <tr key={p.id}>
+                                    <td>
+                                        <div style={{ fontWeight: '700', color: 'var(--slate-900)' }}>{p.name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--slate-500)' }}>{p.owner}</div>
+                                    </td>
+                                    <td style={{ fontSize: '0.875rem' }}>
+                                        <div>{p.address}</div>
+                                        <div style={{ color: 'var(--success)', fontWeight: '500' }}>{p.phone}</div>
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <div style={{ fontWeight: '700', color: (p.debt - p.totalPaid) > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                                            {formatIDR(p.debt - p.totalPaid)}
+                                        </div>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                                            <button
+                                                onClick={() => { setSelectedPartner(p); setShowInventoryModal(true); }}
+                                                className="action-btn"
+                                                title="Cek Stok"
+                                            >
+                                                <Package size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => { setSelectedPartner(p); setShowEditModal(true); }}
+                                                className="action-btn"
+                                                title="Edit Mitra"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => { setSelectedPartner(p); setShowPaymentModal(true); }}
+                                                className="action-btn success"
+                                                title="Bayar Piutang"
+                                            >
+                                                <DollarSign size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {filteredPartners.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: 'center', padding: '3rem', color: 'var(--slate-400)' }}>
+                                        Tidak ada mitra yang ditemukan
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Add Modal */}

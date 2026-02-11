@@ -8,6 +8,9 @@ const STORAGE_KEYS = {
     SALES: 'erp_sales',
     RETURNS: 'erp_returns',
     PAYMENTS: 'erp_payments',
+    EXPENSES: 'erp_expenses',
+    NOTIFICATIONS: 'erp_notifications',
+    CASHFLOW: 'erp_cashflow',
     USER: 'erp_user'
 };
 

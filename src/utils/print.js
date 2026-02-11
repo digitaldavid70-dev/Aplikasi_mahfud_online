@@ -5,8 +5,15 @@ import { formatIDR, formatDateShort } from './formatters';
  * @param {Object} distribution - Distribution object
  * @param {Object} partner - Partner object
  * @param {Object} product - Product object
+ * @param {Object} settings - Application settings
  */
-export const printDistributionInvoice = (distribution, partner, product) => {
+export const printDistributionInvoice = (distribution, partner, product, settings) => {
+  const companyName = settings?.companyName || 'ERP DISTRI - GUDANG PUSAT';
+  const companyInfo = `
+        <strong>${companyName}</strong><br/>
+        ${settings?.companyAddress || 'Sistem Distribusi & Konsinyasi'}<br/>
+        ${settings?.companyPhone ? `Telp/WA: ${settings.companyPhone}` : ''}
+    `;
   const printWindow = window.open('', '_blank');
 
   printWindow.document.write(`
@@ -164,8 +171,7 @@ export const printDistributionInvoice = (distribution, partner, product) => {
           <div>
             <div class="section-title">Dari:</div>
             <div class="section-content">
-              <strong>ERP DISTRI - GUDANG PUSAT</strong><br/>
-              Sistem Distribusi & Konsinyasi
+              ${companyInfo}
             </div>
           </div>
           <div>
@@ -252,8 +258,15 @@ export const printDistributionInvoice = (distribution, partner, product) => {
 /**
  * Print sales invoice
  * @param {Object} sale - Sale object
+ * @param {Object} settings - Application settings
  */
-export const printInvoice = (sale) => {
+export const printInvoice = (sale, settings) => {
+  const companyName = settings?.companyName || 'ERP DISTRI PUSAT';
+  const companyInfo = `
+        <strong>${companyName}</strong><br/>
+        ${settings?.companyAddress || 'Gudang Utama'}<br/>
+        ${settings?.companyPhone ? `Telp/WA: ${settings.companyPhone}` : ''}
+    `;
   const printWindow = window.open('', '_blank');
 
   printWindow.document.write(`
@@ -384,8 +397,7 @@ export const printInvoice = (sale) => {
           <div>
             <div class="section-title">Dari:</div>
             <div class="section-content">
-              <strong>ERP DISTRI PUSAT</strong><br/>
-              Gudang Utama
+              ${companyInfo}
             </div>
           </div>
           <div>

@@ -1,18 +1,35 @@
 import React from 'react';
 import { Package } from 'lucide-react';
+import { toast } from 'sonner';
 import { useApp } from '../../contexts/AppContext';
 import Button from '../common/Button';
 
 const LoginView = () => {
-    const { login } = useApp();
+    const { login, settings } = useApp();
+
+    // Ensure theme is applied even on login screen
+    React.useEffect(() => {
+        if (settings?.darkMode) {
+            document.body.setAttribute('data-theme', 'dark');
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
+    }, [settings?.darkMode]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const username = e.target.username.value;
-        const success = login(username);
+        const password = e.target.password.value;
 
-        if (!success) {
-            alert('Username tidak valid! Gunakan "admin" atau "staf"');
+        try {
+            const success = login(username, password);
+
+            if (!success) {
+                toast.error(`Login Gagal! Username atau Password salah.`);
+            }
+        } catch (err) {
+            console.error("Login error:", err);
+            toast.error("Terjadi error saat login: " + err.message);
         }
     };
 
@@ -28,7 +45,7 @@ const LoginView = () => {
             <div style={{
                 width: '100%',
                 maxWidth: '450px',
-                background: 'white',
+                background: 'var(--slate-50)', // Uses variable for dark mode support
                 borderRadius: 'var(--radius-2xl)',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
                 padding: '2.5rem'
@@ -72,7 +89,7 @@ const LoginView = () => {
                         <input
                             name="username"
                             type="text"
-                            placeholder="Username (admin/staf)"
+                            placeholder="Username"
                             required
                             style={{
                                 width: '100%',
@@ -81,12 +98,15 @@ const LoginView = () => {
                                 border: '2px solid var(--slate-200)',
                                 fontSize: '0.875rem',
                                 outline: 'none',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
+                                background: 'var(--slate-50)',
+                                color: 'var(--slate-900)'
                             }}
                         />
                     </div>
                     <div>
                         <input
+                            name="password"
                             type="password"
                             placeholder="Password"
                             required
@@ -97,7 +117,9 @@ const LoginView = () => {
                                 border: '2px solid var(--slate-200)',
                                 fontSize: '0.875rem',
                                 outline: 'none',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
+                                background: 'var(--slate-50)',
+                                color: 'var(--slate-900)'
                             }}
                         />
                     </div>
@@ -124,19 +146,12 @@ const LoginView = () => {
                     borderRadius: 'var(--radius-lg)',
                     fontSize: '0.75rem',
                     color: 'var(--slate-600)',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    lineHeight: '1.6'
                 }}>
-                    <strong>Demo:</strong> Gunakan username <code style={{
-                        background: 'white',
-                        padding: '0.125rem 0.375rem',
-                        borderRadius: '0.25rem',
-                        fontWeight: '600'
-                    }}>admin</code> atau <code style={{
-                        background: 'white',
-                        padding: '0.125rem 0.375rem',
-                        borderRadius: '0.25rem',
-                        fontWeight: '600'
-                    }}>staf</code>
+                    <strong>Akun Demo:</strong><br />
+                    Admin: <code style={{ background: 'white', padding: '2px 6px', borderRadius: '4px' }}>admin</code> / <code style={{ background: 'white', padding: '2px 6px', borderRadius: '4px' }}>admin123</code><br />
+                    Staf: <code style={{ background: 'white', padding: '2px 6px', borderRadius: '4px' }}>staf</code> / <code style={{ background: 'white', padding: '2px 6px', borderRadius: '4px' }}>staf123</code>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './contexts/AppContext';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -10,52 +10,94 @@ import DistributionsView from './components/views/DistributionsView';
 import SalesView from './components/views/SalesView';
 import ReturnsView from './components/views/ReturnsView';
 import ReportsView from './components/views/ReportsView';
+import SettingsView from './components/views/SettingsView';
 import './styles/index.css';
+import { Toaster } from 'sonner';
+
+// Error Boundary for safety
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2rem', color: 'red' }}>
+          <h2>Something went wrong in the App.</h2>
+          <pre>{this.state.error?.toString()}</pre>
+          <button onClick={() => { localStorage.clear(); window.location.reload(); }}>
+            Reset Data
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 function AppContent() {
-  const { isLoggedIn, user, logout } = useApp();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { isLoggedIn, settings, isLoading } = useApp();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Apply Dark Mode
+  useEffect(() => {
+    if (settings?.darkMode) {
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+    }
+  }, [settings?.darkMode]);
+
+  // Close mobile menu when location changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location]);
+
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: 'var(--slate-50)',
+        flexDirection: 'column',
+        gap: '1rem'
+      }}>
+        <div className="spinner"></div>
+        <p style={{ color: 'var(--slate-500)', fontWeight: '500' }}>Memuat data sistem...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <LoginView />;
   }
-
-  const renderView = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <DashboardView />;
-      case 'products':
-        return <ProductsView />;
-      case 'partners':
-        return <PartnersView />;
-      case 'dist':
-        return <DistributionsView />;
-      case 'sales':
-        return <SalesView />;
-      case 'returns':
-        return <ReturnsView />;
-      case 'reports':
-        return <ReportsView />;
-      default:
-        return <DashboardView />;
-    }
-  };
 
   return (
     <div style={{
       display: 'flex',
       height: '100vh',
       overflow: 'hidden',
-      background: 'var(--slate-50)'
+      background: 'var(--slate-50)',
+      position: 'relative'
     }}>
       <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        expanded={sidebarOpen}
-        setExpanded={setSidebarOpen}
-        user={user}
-        logout={logout}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
       <main style={{
@@ -63,20 +105,31 @@ function AppContent() {
         display: 'flex',
         flexDirection: 'column',
         minWidth: 0,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%',
+        marginLeft: '0'
       }}>
         <Header
-          activeTab={activeTab}
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
 
-        <div style={{
+        <div className="main-content" style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '2rem',
+          padding: '1.5rem',
           background: 'var(--slate-50)'
         }}>
-          {renderView()}
+          <Routes>
+            <Route path="/" element={<DashboardView />} />
+            <Route path="/products" element={<ProductsView />} />
+            <Route path="/partners" element={<PartnersView />} />
+            <Route path="/distributions" element={<DistributionsView />} />
+            <Route path="/sales" element={<SalesView />} />
+            <Route path="/returns" element={<ReturnsView />} />
+            <Route path="/reports" element={<ReportsView />} />
+            <Route path="/settings" element={<SettingsView />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </div>
       </main>
     </div>
@@ -85,9 +138,12 @@ function AppContent() {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <Toaster richColors position="top-right" />
+        <AppContent />
+      </AppProvider>
+    </ErrorBoundary>
   );
 }
 

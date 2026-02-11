@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { RotateCcw, Printer } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { RotateCcw, Printer, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import { useApp } from '../../contexts/AppContext';
 import { formatDateShort } from '../../utils/formatters';
 import { printReturnInvoice } from '../../utils/print';
+import { searchInObject } from '../../utils/search';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
+import SearchBar from '../common/SearchBar';
 
 const ReturnsView = () => {
     const { returns, partners, products, createReturn } = useApp();
     const [showModal, setShowModal] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filtered returns based on search
+    const filteredReturns = useMemo(() => {
+        return returns.filter(r => searchInObject(r, searchQuery));
+    }, [returns, searchQuery]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -22,13 +31,13 @@ const ReturnsView = () => {
             setShowModal(false);
             e.target.reset();
         } catch (error) {
-            alert(error.message);
+            toast.error(error.message);
         }
     };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="view-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--slate-900)' }}>
                     Retur Barang
                 </h2>
@@ -38,52 +47,61 @@ const ReturnsView = () => {
                 </Button>
             </div>
 
-            <div className="card" style={{ overflow: 'hidden' }}>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Mitra</th>
-                            <th>Barang</th>
-                            <th style={{ textAlign: 'center' }}>Qty</th>
-                            <th>Alasan</th>
-                            <th style={{ textAlign: 'center' }}>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {returns.map(r => (
-                            <tr key={r.id} style={{ fontSize: '0.875rem' }}>
-                                <td style={{ fontWeight: '700' }}>{formatDateShort(r.date)}</td>
-                                <td>{r.partnerName}</td>
-                                <td>{r.productName}</td>
-                                <td style={{ textAlign: 'center', fontWeight: '700', color: 'var(--danger)' }}>
-                                    {r.qty}
-                                </td>
-                                <td style={{ fontStyle: 'italic', color: 'var(--slate-500)' }}>
-                                    {r.reason}
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                    <button
-                                        onClick={() => printReturnInvoice(r)}
-                                        style={{
-                                            padding: '0.5rem',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            cursor: 'pointer',
-                                            borderRadius: 'var(--radius-lg)',
-                                            color: 'var(--danger)',
-                                            display: 'inline-flex',
-                                            alignItems: 'center'
-                                        }}
-                                        title="Cetak Bukti Retur"
-                                    >
-                                        <Printer size={18} />
-                                    </button>
-                                </td>
+            {/* toolbar */}
+            <div className="card" style={{ padding: '1rem' }}>
+                <SearchBar
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Cari mitra, produk, atau alasan..."
+                />
+            </div>
+
+            <div className="card">
+                <div className="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Mitra</th>
+                                <th>Barang</th>
+                                <th style={{ textAlign: 'center' }}>Qty</th>
+                                <th>Alasan</th>
+                                <th style={{ textAlign: 'center' }}>Aksi</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredReturns.map(r => (
+                                <tr key={r.id}>
+                                    <td style={{ fontWeight: '600' }}>{formatDateShort(r.date)}</td>
+                                    <td>{r.partnerName}</td>
+                                    <td style={{ fontWeight: '600' }}>{r.productName}</td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span style={{ fontWeight: '700', color: 'var(--danger)' }}>{r.qty}</span>
+                                    </td>
+                                    <td style={{ fontSize: '0.875rem', color: 'var(--slate-500)', fontStyle: 'italic' }}>
+                                        {r.reason}
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <button
+                                            onClick={() => printReturnInvoice(r)}
+                                            className="action-btn danger"
+                                            title="Cetak Bukti Retur"
+                                        >
+                                            <Printer size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {filteredReturns.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--slate-400)' }}>
+                                        Tidak ada data retur yang ditemukan
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Input Retur Barang">
