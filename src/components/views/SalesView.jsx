@@ -112,7 +112,8 @@ const SalesView = () => {
                 </div>
             </div>
 
-            <div className="card">
+            {/* Sales Table (Desktop) */}
+            <div className="card hidden md:block">
                 <div className="table-container">
                     <table>
                         <thead>
@@ -153,7 +154,7 @@ const SalesView = () => {
                                         <button
                                             onClick={() => {
                                                 const msg = formatInvoiceMessage(s, settings);
-                                                openWhatsApp(s.buyerPhone || '', msg); // Assuming buyerPhone might exist later, or just open with text
+                                                openWhatsApp(s.buyerPhone || '', msg);
                                             }}
                                             className="action-btn"
                                             title="Kirim ke WhatsApp"
@@ -181,6 +182,71 @@ const SalesView = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden grid grid-cols-1 gap-4">
+                {filteredSales.map(s => (
+                    <div key={s.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                                    <Calendar size={12} />
+                                    {formatDateShort(s.saleDate)}
+                                </div>
+                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                    <User size={16} className="text-blue-500" />
+                                    {s.buyerName}
+                                </h3>
+                                <div className="text-xs text-slate-500 mt-1">
+                                    {s.partnerName}
+                                </div>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${s.paymentMethod === 'Tunai' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                {s.paymentMethod}
+                            </span>
+                        </div>
+
+                        <div className="bg-slate-50 p-3 rounded-lg mb-3">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="font-medium text-slate-700 text-sm">{s.productName}</span>
+                                <span className="font-bold text-slate-900">x{s.qty}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs text-slate-500">
+                                <span>{formatIDR(s.price)} / unit</span>
+                                <span className="font-bold text-blue-600 text-sm">{formatIDR(s.total)}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 mt-2">
+                            <button
+                                onClick={() => {
+                                    const msg = formatInvoiceMessage(s, settings);
+                                    openWhatsApp(s.buyerPhone || '', msg);
+                                }}
+                                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-[#25D366] text-white font-medium text-sm active:scale-95 transition-transform"
+                            >
+                                <MessageCircle size={16} />
+                                WhatsApp
+                            </button>
+                            <button
+                                onClick={() => printInvoice(s, settings)}
+                                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200 active:scale-95 transition-transform"
+                            >
+                                <Printer size={16} />
+                                Cetak
+                            </button>
+                        </div>
+                    </div>
+                ))}
+
+                {filteredSales.length === 0 && (
+                    <div className="text-center py-12 text-slate-400">
+                        <MessageCircle size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>Belum ada data penjualan</p>
+                    </div>
+                )}
             </div>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Input Penjualan">
@@ -229,7 +295,7 @@ const SalesView = () => {
                         </button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div>
                             <label style={{ fontSize: '0.625rem', fontWeight: '700', color: 'var(--slate-500)', display: 'block', marginBottom: '0.25rem' }}>
                                 TGL TRANSAKSI
@@ -265,7 +331,7 @@ const SalesView = () => {
 
                     <input name="buyerName" placeholder="Nama Pembeli" required />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <CurrencyInput onChange={setPrice} placeholder="Harga Jual" required />
                         <input name="qty" type="number" placeholder="Qty" min="1" required />
                     </div>

@@ -11,6 +11,7 @@ import SalesView from './components/views/SalesView';
 import ReturnsView from './components/views/ReturnsView';
 import ReportsView from './components/views/ReportsView';
 import SettingsView from './components/views/SettingsView';
+import BottomNav from './components/layout/BottomNav';
 import './styles/index.css';
 import { Toaster } from 'sonner';
 
@@ -48,7 +49,7 @@ class ErrorBoundary extends React.Component {
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 function AppContent() {
-  const { isLoggedIn, settings, isLoading } = useApp();
+  const { isLoggedIn, settings, isLoading, user } = useApp();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -109,16 +110,23 @@ function AppContent() {
         width: '100%',
         marginLeft: '0'
       }}>
-        <Header
-          onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        />
+        <div className="hidden md:block">
+          <Header
+            onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          />
+        </div>
 
-        <div className="main-content" style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '1.5rem',
-          background: 'var(--slate-50)'
-        }}>
+        {/* Mobile Header (simplified) */}
+        <div className="md:hidden bg-white p-4 flex justify-between items-center shadow-sm z-10">
+          <h1 className="font-bold text-lg text-slate-800">EDistri</h1>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+              {user?.fullName?.charAt(0) || 'A'}
+            </div>
+          </div>
+        </div>
+
+        <div className="main-content flex-1 overflow-y-auto bg-slate-50 p-4 pb-24 md:p-6 md:pb-6">
           <Routes>
             <Route path="/" element={<DashboardView />} />
             <Route path="/products" element={<ProductsView />} />
@@ -131,7 +139,9 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+
       </main>
+      <BottomNav />
     </div>
   );
 }

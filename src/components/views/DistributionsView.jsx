@@ -84,7 +84,8 @@ const DistributionsView = () => {
                 </div>
             </div>
 
-            <div className="card">
+            {/* Distributions Table (Desktop) */}
+            <div className="card hidden md:block">
                 <div className="table-container">
                     <table>
                         <thead>
@@ -172,6 +173,81 @@ const DistributionsView = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden grid grid-cols-1 gap-4">
+                {filteredDistributions.map(d => {
+                    const partner = partners.find(p => p.id === d.partnerId);
+                    return (
+                        <div key={d.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <div className="text-xs text-slate-400 mb-1 flex items-center gap-1">
+                                        <Truck size={12} />
+                                        {formatDateShort(d.date)}
+                                    </div>
+                                    <h3 className="font-bold text-slate-800">{partner?.name}</h3>
+                                    <div className="text-xs text-slate-500 mt-1">
+                                        Req: {formatDateShort(d.reqDate)}
+                                    </div>
+                                </div>
+                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${d.status === 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                                    }`}>
+                                    {d.status}
+                                </span>
+                            </div>
+
+                            <div className="bg-slate-50 p-3 rounded-lg mb-3">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="font-medium text-slate-700">{d.productName}</span>
+                                    <span className="font-bold text-blue-600">x{d.qty}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-2 mt-2">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const product = products.find(p => p.id === d.productId);
+                                            const msg = formatDistributionMessage(d, partner, product, settings);
+                                            openWhatsApp(partner?.phone || '', msg);
+                                        }}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-[#25D366] text-white font-medium text-sm active:scale-95 transition-transform"
+                                    >
+                                        <MessageCircle size={16} />
+                                        WA Surat Jalan
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const product = products.find(p => p.id === d.productId);
+                                            printDistributionInvoice(d, partner, product, settings);
+                                        }}
+                                        className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium text-sm hover:bg-slate-200 active:scale-95 transition-transform"
+                                    >
+                                        <Printer size={16} />
+                                        Cetak
+                                    </button>
+                                </div>
+                                {d.status === 'Dalam Perjalanan' && (
+                                    <button
+                                        onClick={() => handleMarkAsDelivered(d.id)}
+                                        className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium text-sm active:scale-95 transition-transform"
+                                    >
+                                        Tandai Barang Sampai
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+
+                {filteredDistributions.length === 0 && (
+                    <div className="text-center py-12 text-slate-400">
+                        <Truck size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>Tidak ada data pengiriman</p>
+                    </div>
+                )}
             </div>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Kirim Barang ke Mitra">

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Trash2, Edit3, Search, CheckSquare, Square } from 'lucide-react';
+import { Plus, Trash2, Edit3, Search, CheckSquare, Square, Box } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { formatIDR } from '../../utils/formatters';
 import { searchInObject } from '../../utils/search';
@@ -94,8 +94,8 @@ const ProductsView = () => {
                 </div>
             </div>
 
-            {/* Products Table */}
-            <div className="card">
+            {/* Products Table (Desktop) */}
+            <div className="card hidden md:block">
                 <div className="table-container">
                     <table>
                         <thead>
@@ -170,6 +170,80 @@ const ProductsView = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden grid grid-cols-1 gap-4">
+                {/* Select All Bar (Mobile) */}
+                {filteredProducts.length > 0 && (
+                    <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200 flex items-center justify-between">
+                        <button
+                            onClick={handleSelectAll}
+                            className="flex items-center gap-2 text-slate-600 font-medium"
+                        >
+                            {selectedIds.length === filteredProducts.length
+                                ? <CheckSquare size={20} className="text-blue-600" />
+                                : <Square size={20} className="text-slate-400" />
+                            }
+                            <span>Pilih Semua</span>
+                        </button>
+                        <span className="text-xs text-slate-500">{selectedIds.length} terpilih</span>
+                    </div>
+                )}
+
+                {filteredProducts.map(p => (
+                    <div
+                        key={p.id}
+                        className={`bg-white p-4 rounded-xl shadow-sm border transition-colors relative ${selectedIds.includes(p.id) ? 'border-amber-400 bg-amber-50/30' : 'border-slate-200'
+                            }`}
+                        onClick={() => handleSelectItem(p.id)}
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 p-2 rounded-lg ${p.stock < 20 ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                                    <Box size={24} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-slate-800">{p.name}</h3>
+                                        {p.stock < 20 && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">Stok Tipis</span>}
+                                    </div>
+                                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full mt-1 inline-block">
+                                        {p.category}
+                                    </span>
+                                </div>
+                            </div>
+                            <div onClick={(e) => e.stopPropagation()}>
+                                <button
+                                    onClick={() => handleSelectItem(p.id)}
+                                    className={selectedIds.includes(p.id) ? 'text-blue-600' : 'text-slate-300'}
+                                >
+                                    {selectedIds.includes(p.id) ? <CheckSquare size={24} /> : <Square size={24} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-end border-t border-slate-100 pt-3 mt-1">
+                            <div>
+                                <p className="text-xs text-slate-400 mb-1">Harga Jual</p>
+                                <p className="font-bold text-lg text-blue-600">{formatIDR(p.price)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-xs text-slate-400 mb-1">Sisa Stok</p>
+                                <p className={`font-bold text-lg ${p.stock < 20 ? 'text-red-600' : 'text-slate-700'}`}>
+                                    {p.stock} <span className="text-xs font-normal text-slate-400">unit</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {filteredProducts.length === 0 && (
+                    <div className="text-center py-12 text-slate-400">
+                        <Box size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>Tidak ada produk ditemukan</p>
+                    </div>
+                )}
             </div>
 
             {/* Add Product Modal */}

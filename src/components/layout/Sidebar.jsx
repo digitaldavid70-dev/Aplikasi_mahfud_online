@@ -48,7 +48,7 @@ const Sidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                 />
             )}
 
-            <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+            <aside className={`sidebar hidden md:flex ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <div style={{ background: 'var(--primary)', padding: '0.5rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.5)' }}>
