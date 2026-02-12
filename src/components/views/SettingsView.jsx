@@ -43,31 +43,16 @@ const SettingsView = () => {
 
             <div className="card" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
                 {/* Tabs Header */}
-                <div style={{
-                    display: 'flex',
-                    overflowX: 'auto',
-                    background: 'var(--slate-50)',
-                    borderBottom: '1px solid var(--slate-200)',
-                    padding: '0 1rem'
-                }}>
+                {/* Tabs Header */}
+                <div className="flex overflow-x-auto bg-slate-50 border-b border-slate-200 px-4 no-scrollbar">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.75rem',
-                                padding: '1.25rem 1.5rem',
-                                border: 'none',
-                                background: 'none',
-                                color: activeTab === tab.id ? 'var(--primary)' : 'var(--slate-500)',
-                                fontWeight: activeTab === tab.id ? '700' : '500',
-                                borderBottom: activeTab === tab.id ? '3px solid var(--primary)' : '3px solid transparent',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                whiteSpace: 'nowrap'
-                            }}
+                            className={`flex-shrink-0 flex items-center gap-3 px-6 py-5 border-b-[3px] transition-all whitespace-nowrap ${activeTab === tab.id
+                                    ? 'border-orange-500 text-orange-500 font-bold'
+                                    : 'border-transparent text-slate-500 font-medium hover:text-slate-700'
+                                }`}
                         >
                             {tab.icon}
                             {tab.label}
