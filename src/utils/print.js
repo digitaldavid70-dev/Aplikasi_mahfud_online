@@ -8,12 +8,18 @@ import { formatIDR, formatDateShort } from './formatters';
  * @param {Object} settings - Application settings
  */
 export const printDistributionInvoice = (distribution, partner, product, settings) => {
-  const companyName = settings?.companyName || 'ERP DISTRI - GUDANG PUSAT';
+  const companyName = settings?.companyName || 'ERP DISTRI';
   const companyInfo = `
         <strong>${companyName}</strong><br/>
-        ${settings?.companyAddress || 'Sistem Distribusi & Konsinyasi'}<br/>
+        ${settings?.companyAddress || 'Sistem Distribusi'}<br/>
         ${settings?.companyPhone ? `Telp/WA: ${settings.companyPhone}` : ''}
     `;
+
+  if (!partner || !product) {
+    console.error('Missing partner or product data for printing');
+    return;
+  }
+
   const printWindow = window.open('', '_blank');
 
   printWindow.document.write(`
@@ -238,8 +244,15 @@ export const printDistributionInvoice = (distribution, partner, product, setting
           </div>
         </div>
         
+        ${settings?.bankInfo ? `
+        <div style="margin-top: 30px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px;">
+          <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; text-transform: uppercase; font-size: 11px;">Informasi Pembayaran (Bank):</div>
+          <div style="white-space: pre-wrap; color: #475569;">${settings.bankInfo}</div>
+        </div>
+        ` : ''}
+
         <div class="footer">
-          Dokumen ini adalah bukti sah pengiriman barang konsinyasi.<br/>
+          Dokumen ini adalah bukti sah pengiriman barang.<br/>
           Dicetak otomatis oleh sistem ERP Distribusi.
         </div>
         
@@ -261,12 +274,15 @@ export const printDistributionInvoice = (distribution, partner, product, setting
  * @param {Object} settings - Application settings
  */
 export const printInvoice = (sale, settings) => {
-  const companyName = settings?.companyName || 'ERP DISTRI PUSAT';
+  const companyName = settings?.companyName || 'ERP DISTRI';
   const companyInfo = `
         <strong>${companyName}</strong><br/>
         ${settings?.companyAddress || 'Gudang Utama'}<br/>
         ${settings?.companyPhone ? `Telp/WA: ${settings.companyPhone}` : ''}
     `;
+
+  if (!sale) return;
+
   const printWindow = window.open('', '_blank');
 
   printWindow.document.write(`
@@ -440,6 +456,13 @@ export const printInvoice = (sale, settings) => {
           Metode Pembayaran: <strong>${sale.paymentMethod}</strong>
         </div>
         
+        ${settings?.bankInfo ? `
+        <div style="margin-top: 30px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px;">
+          <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; text-transform: uppercase; font-size: 11px;">Informasi Pembayaran (Bank):</div>
+          <div style="white-space: pre-wrap; color: #475569;">${settings.bankInfo}</div>
+        </div>
+        ` : ''}
+
         <div class="footer">
           Terima kasih atas kepercayaan Anda.<br/>
           Dokumen ini dicetak otomatis oleh sistem ERP Distribusi.

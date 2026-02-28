@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
     Building2, Users, BellRing, Database, Palette,
     Save, Download, Upload, Trash2, ShieldCheck,
-    Moon, Sun, MapPin, Phone, Globe, Mail, MessageCircle
+    Moon, Sun, MapPin, Phone, Globe, Mail, MessageCircle, CreditCard
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useApp } from '../../contexts/AppContext';
@@ -50,8 +50,8 @@ const SettingsView = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-shrink-0 flex items-center gap-3 px-6 py-5 border-b-[3px] transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'border-orange-500 text-orange-500 font-bold'
-                                    : 'border-transparent text-slate-500 font-medium hover:text-slate-700'
+                                ? 'border-orange-500 text-orange-500 font-bold'
+                                : 'border-transparent text-slate-500 font-medium hover:text-slate-700'
                                 }`}
                         >
                             {tab.icon}
@@ -129,6 +129,20 @@ const SettingsView = () => {
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <label style={{ fontWeight: '600', fontSize: '0.875rem' }}>Informasi Rekening / Pembayaran</label>
+                                <div style={{ position: 'relative' }}>
+                                    <CreditCard size={18} style={{ position: 'absolute', left: '1rem', top: '1rem', color: 'var(--slate-400)' }} />
+                                    <textarea
+                                        value={localSettings.bankInfo}
+                                        onChange={(e) => setLocalSettings({ ...localSettings, bankInfo: e.target.value })}
+                                        style={{ paddingLeft: '3rem', width: '100%', minHeight: '80px' }}
+                                        placeholder="Contoh: BCA 123456789 a/n Nama Anda..."
+                                    />
+                                </div>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--slate-500)' }}>Informasi ini akan muncul di bagian bawah setiap invoice cetak.</p>
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--slate-200)', paddingTop: '1.5rem' }}>

@@ -89,6 +89,7 @@ create table app_settings (
   debt_limit numeric default 10000000,
   wa_invoice_template text,
   wa_distribution_template text,
+  bank_info text,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );
 
