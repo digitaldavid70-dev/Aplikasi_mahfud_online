@@ -102,8 +102,8 @@ const PartnersView = () => {
                                         <div style={{ color: 'var(--success)', fontWeight: '500' }}>{p.phone}</div>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: '700', color: (p.debt - p.totalPaid) > 0 ? 'var(--danger)' : 'var(--success)' }}>
-                                            {formatIDR(p.debt - p.totalPaid)}
+                                        <div style={{ fontWeight: '700', color: (Number(p.debt || 0) - Number(p.totalPaid || 0)) > 0 ? 'var(--danger)' : 'var(--success)' }}>
+                                            {formatIDR(Number(p.debt || 0) - Number(p.totalPaid || 0))}
                                         </div>
                                     </td>
                                     <td style={{ textAlign: 'center' }}>
@@ -215,7 +215,7 @@ const PartnersView = () => {
                     <div style={{ marginBottom: '1rem', padding: '1rem', background: 'var(--slate-50)', borderRadius: 'var(--radius-lg)' }}>
                         <p style={{ fontSize: '0.875rem', color: 'var(--slate-500)', marginBottom: '0.25rem' }}>Total Piutang:</p>
                         <p style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--danger)' }}>
-                            {formatIDR(selectedPartner.debt - selectedPartner.totalPaid)}
+                            {formatIDR(Number(selectedPartner.debt || 0) - Number(selectedPartner.totalPaid || 0))}
                         </p>
                     </div>
                     <CurrencyInput onChange={setPaymentAmount} placeholder="Jumlah Pembayaran" />

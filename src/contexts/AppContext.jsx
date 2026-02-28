@@ -66,11 +66,28 @@ export const AppProvider = ({ children }) => {
 
                 // 2. Fetch Products
                 const { data: productsData } = await supabase.from('products').select('*');
-                if (productsData) setProducts(productsData);
+                if (productsData) {
+                    const mappedProducts = productsData.map(p => ({
+                        ...p,
+                        price: Number(p.price) || 0,
+                        stock: Number(p.stock) || 0,
+                        discount: Number(p.discount) || 0
+                    }));
+                    setProducts(mappedProducts);
+                }
 
                 // 3. Fetch Partners
                 const { data: partnersData } = await supabase.from('partners').select('*');
-                if (partnersData) setPartners(partnersData);
+                if (partnersData) {
+                    const mappedPartners = partnersData.map(p => ({
+                        ...p,
+                        debt: Number(p.debt) || 0,
+                        totalPaid: Number(p.total_paid) || 0,
+                        creditLimit: Number(p.credit_limit) || 0,
+                        inventory: typeof p.inventory === 'object' ? p.inventory : {}
+                    }));
+                    setPartners(mappedPartners);
+                }
 
                 // 4. Fetch Sales (Join with Products and Partners to get names)
                 const { data: salesData } = await supabase.from('sales')
@@ -82,7 +99,10 @@ export const AppProvider = ({ children }) => {
                         ...s,
                         productName: s.products?.name || 'Unknown Product',
                         partnerName: s.is_direct ? 'Gudang Pusat' : (s.partners?.name || 'Unknown Partner'),
-                        saleDate: s.date // Map 'date' back to 'saleDate' if needed, or unify
+                        saleDate: s.date,
+                        qty: Number(s.qty) || 0,
+                        price: Number(s.price) || 0,
+                        total: Number(s.total) || 0
                     }));
                     setSales(mappedSales);
                 }
@@ -96,28 +116,41 @@ export const AppProvider = ({ children }) => {
                     const mappedDist = distData.map(d => ({
                         ...d,
                         productName: d.products?.name,
-                        partnerName: d.partners?.name
+                        partnerName: d.partners?.name,
+                        qty: Number(d.qty) || 0
                     }));
                     setDistributions(mappedDist);
                 }
-
-                // 6. Fetch Returns
-                const { data: returnsData } = await supabase.from('returns')
-                    .select('*, products(name), partners(name)')
-                    .order('date', { ascending: false });
 
                 if (returnsData) {
                     const mappedReturns = returnsData.map(r => ({
                         ...r,
                         productName: r.products?.name,
-                        partnerName: r.partners?.name
+                        partnerName: r.partners?.name,
+                        qty: Number(r.qty) || 0
                     }));
                     setReturns(mappedReturns);
                 }
 
+                // Extra: Fetch Payments (for reports)
+                const { data: payData } = await supabase.from('payments').select('*').order('date', { ascending: false });
+                if (payData) {
+                    const mappedPayments = payData.map(p => ({
+                        ...p,
+                        amount: Number(p.amount) || 0
+                    }));
+                    setPayments(mappedPayments);
+                }
+
                 // 7. Fetch Expenses
                 const { data: expensesData } = await supabase.from('expenses').select('*').order('date', { ascending: false });
-                if (expensesData) setExpenses(expensesData);
+                if (expensesData) {
+                    const mappedExpenses = expensesData.map(e => ({
+                        ...e,
+                        amount: Number(e.amount) || 0
+                    }));
+                    setExpenses(mappedExpenses);
+                }
 
             } catch (error) {
                 console.error('Error fetching data:', error);

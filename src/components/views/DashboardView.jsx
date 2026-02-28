@@ -12,10 +12,10 @@ const DashboardView = () => {
 
     // Calculate statistics
     const stats = useMemo(() => ({
-        totalRevenue: sales.reduce((acc, sale) => acc + (sale.total || 0), 0),
-        totalDebt: partners.reduce((acc, p) => acc + ((p.debt || 0) - (p.totalPaid || 0)), 0),
+        totalRevenue: sales.reduce((acc, sale) => acc + (Number(sale.total) || 0), 0),
+        totalDebt: partners.reduce((acc, p) => acc + (Number(p.debt || 0) - Number(p.totalPaid || 0)), 0),
         activeShipments: distributions.filter(d => d.status === 'Dalam Perjalanan').length,
-        lowStockCount: products.filter(p => p.stock < 20).length
+        lowStockCount: products.filter(p => Number(p.stock) < 20).length
     }), [sales, partners, distributions, products]);
 
     // Revenue Trend Data (Last 7 days or months)
