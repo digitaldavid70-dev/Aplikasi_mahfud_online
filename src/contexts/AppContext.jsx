@@ -122,6 +122,11 @@ export const AppProvider = ({ children }) => {
                     setDistributions(mappedDist);
                 }
 
+                // 6. Fetch Returns
+                const { data: returnsData } = await supabase.from('returns')
+                    .select('*, products(name), partners(name)')
+                    .order('date', { ascending: false });
+
                 if (returnsData) {
                     const mappedReturns = returnsData.map(r => ({
                         ...r,
@@ -132,16 +137,6 @@ export const AppProvider = ({ children }) => {
                     setReturns(mappedReturns);
                 }
 
-                // Extra: Fetch Payments (for reports)
-                const { data: payData } = await supabase.from('payments').select('*').order('date', { ascending: false });
-                if (payData) {
-                    const mappedPayments = payData.map(p => ({
-                        ...p,
-                        amount: Number(p.amount) || 0
-                    }));
-                    setPayments(mappedPayments);
-                }
-
                 // 7. Fetch Expenses
                 const { data: expensesData } = await supabase.from('expenses').select('*').order('date', { ascending: false });
                 if (expensesData) {
@@ -150,6 +145,16 @@ export const AppProvider = ({ children }) => {
                         amount: Number(e.amount) || 0
                     }));
                     setExpenses(mappedExpenses);
+                }
+
+                // Optional: Fetch Payments (if table exists)
+                const { data: payData, error: payError } = await supabase.from('payments').select('*').order('date', { ascending: false });
+                if (!payError && payData) {
+                    const mappedPayments = payData.map(p => ({
+                        ...p,
+                        amount: Number(p.amount) || 0
+                    }));
+                    setPayments(mappedPayments);
                 }
 
             } catch (error) {
