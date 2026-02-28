@@ -81,9 +81,9 @@ export const AppProvider = ({ children }) => {
                 if (partnersData) {
                     const mappedPartners = partnersData.map(p => ({
                         ...p,
-                        debt: Number(p.debt) || 0,
                         totalPaid: Number(p.total_paid) || 0,
                         creditLimit: Number(p.credit_limit) || 0,
+                        debt: Number(p.debt) || 0,
                         inventory: typeof p.inventory === 'object' ? p.inventory : {}
                     }));
                     setPartners(mappedPartners);
@@ -97,6 +97,12 @@ export const AppProvider = ({ children }) => {
                 if (salesData) {
                     const mappedSales = salesData.map(s => ({
                         ...s,
+                        buyerName: s.buyer_name,
+                        buyerPhone: s.buyer_phone,
+                        productId: s.product_id,
+                        partnerId: s.partner_id,
+                        paymentMethod: s.payment_method,
+                        isDirect: s.is_direct,
                         productName: s.products?.name || 'Unknown Product',
                         partnerName: s.is_direct ? 'Gudang Pusat' : (s.partners?.name || 'Unknown Partner'),
                         saleDate: s.date,
@@ -115,6 +121,9 @@ export const AppProvider = ({ children }) => {
                 if (distData) {
                     const mappedDist = distData.map(d => ({
                         ...d,
+                        partnerId: d.partner_id,
+                        productId: d.product_id,
+                        reqDate: d.req_date,
                         productName: d.products?.name,
                         partnerName: d.partners?.name,
                         qty: Number(d.qty) || 0
@@ -130,6 +139,8 @@ export const AppProvider = ({ children }) => {
                 if (returnsData) {
                     const mappedReturns = returnsData.map(r => ({
                         ...r,
+                        partnerId: r.partner_id,
+                        productId: r.product_id,
                         productName: r.products?.name,
                         partnerName: r.partners?.name,
                         qty: Number(r.qty) || 0
@@ -152,6 +163,7 @@ export const AppProvider = ({ children }) => {
                 if (!payError && payData) {
                     const mappedPayments = payData.map(p => ({
                         ...p,
+                        partnerId: p.partner_id,
                         amount: Number(p.amount) || 0
                     }));
                     setPayments(mappedPayments);
